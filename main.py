@@ -1,28 +1,27 @@
-#!/usr/bin/env python3
-"""Copy the entry image to the output directory, byte for byte.
+"""Copy the finished entry image to the output directory.
 
-The image lives next to this program in the repository. The output is a
-pure copy, so it is deterministic by construction: the same bytes out
-every run.
+The entry image (entry.png, a JPEG) sits beside this program in the
+repository. This program copies it byte for byte to the output directory
+(env MAKEFUN_OUTPUT_DIR, else /output) as entry.png. Pure copy: no
+network, no clock, no randomness, so the output is identical every run.
 """
 
 import os
 import shutil
 from pathlib import Path
 
-SOURCE_NAME = "entry.png"
-
 
 def main() -> None:
-    source = Path(__file__).resolve().parent / SOURCE_NAME
+    here = Path(__file__).resolve().parent
+    source = here / "entry.png"
     if not source.is_file():
         raise SystemExit(f"missing entry image: {source}")
-    output_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
-    output_dir.mkdir(parents=True, exist_ok=True)
-    destination = output_dir / SOURCE_NAME
-    shutil.copyfile(source, destination)
-    if destination.stat().st_size != source.stat().st_size:
-        raise SystemExit("incomplete copy: output size differs from source")
+    out_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dest = out_dir / "entry.png"
+    shutil.copyfile(source, dest)
+    if dest.stat().st_size != source.stat().st_size:
+        raise SystemExit("copy size mismatch")
 
 
 if __name__ == "__main__":
